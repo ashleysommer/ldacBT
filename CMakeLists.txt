@@ -3,6 +3,7 @@ project(libldac C)
 
 set(CMAKE_C_STANDARD 99)
 
+option(BUILD_SHARED_LIBS "Build shared libraries" ON)
 
 option(LDAC_SOFT_FLOAT "For device without FPU, turn on this option" OFF)
 if(${LDAC_SOFT_FLOAT} STREQUAL ON)
@@ -38,10 +39,17 @@ include_directories(libldac/inc)
 include_directories(libldac/abr/inc)
 
 # libldacBT_enc
+if (NOT BUILD_SHARED_LIBS)
+add_library(ldacBT_enc STATIC
+        libldac/src/ldaclib.c
+        libldac/src/ldacBT.c
+        )
+else()
 add_library(ldacBT_enc SHARED
         libldac/src/ldaclib.c
         libldac/src/ldacBT.c
         )
+endif()
 
 target_link_libraries(ldacBT_enc m)
 target_compile_definitions(ldacBT_enc PUBLIC ${LDAC_SOFT_FLOAT_DEFINE})
@@ -51,9 +59,15 @@ set_target_properties(ldacBT_enc PROPERTIES
         )
 
 # libldacBT_abr
+if (NOT BUILD_SHARED_LIBS)
+add_library(ldacBT_abr STATIC
+        libldac/abr/src/ldacBT_abr.c
+        )
+else()
 add_library(ldacBT_abr SHARED
         libldac/abr/src/ldacBT_abr.c
         )
+endif()
 
 target_link_libraries(ldacBT_abr ldacBT_enc)
 set_target_properties(ldacBT_abr PROPERTIES
